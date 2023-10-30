@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { apiRouter } from './routes/apiRouter';
 import { logger } from './logger';
+import { db } from './db/conn';
 
 dotenv.config();
 
@@ -14,6 +15,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors({ origin: '*' }));
+
+db();
 
 //TODO: impelment auth middleware
 app.use('/v1/api', apiRouter);
