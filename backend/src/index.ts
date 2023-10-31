@@ -1,10 +1,11 @@
-import express, { Request, Response } from 'express';
-import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import { apiRouter } from './routes/apiRouter';
-import { logger } from './logger';
+import dotenv from 'dotenv';
+import express from 'express';
 import { db } from './db/conn';
+import { logger } from './logger';
+import { apiRouter } from './routes/apiRouter';
+import { userRouter } from './routes/userRouter';
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ db();
 
 //TODO: impelment auth middleware
 app.use('/v1/api', apiRouter);
+app.use('/account', userRouter);
 app.all('*', (_, res) => {
   res.status(404).send('Invalid Path');
 });

@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { Schema, model } from 'mongoose';
 
-const TaskSchema = new Schema(
+const UserSchema = new Schema(
   {
     _id: {
       type: String,
@@ -9,22 +9,25 @@ const TaskSchema = new Schema(
         return randomUUID();
       },
     },
-    title: { type: String, required: [true, 'Title is required'] },
+    name: { type: String, required: [true, 'Name is required'] },
+    username: {
+      type: String,
+      required: [true, 'Username is required'],
+      unique: true,
+    },
+    password: { type: String, required: [true, 'Password is required'] },
     status: {
       type: String,
       required: [true, 'status is required'],
       enum: {
-        values: ['All', 'To Do', 'In Progress', 'Done'],
+        values: ['active', 'in-active'],
         message: 'Incorrect {VALUE} for status',
       },
     },
-    user: { type: String, required: [true, 'User is required'] },
   },
   {
     timestamps: true,
-    // validateBeforeSave:
-    // _id: false,
   }
 );
 
-export const Tasks = model('task', TaskSchema, 'tasks');
+export const Users = model('user', UserSchema, 'users');
