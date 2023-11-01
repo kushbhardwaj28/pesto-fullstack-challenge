@@ -2,57 +2,91 @@ import { Router } from 'express';
 import { Users } from '../db/schema/user';
 import { logger } from '../../src/logger';
 import { hash } from 'bcryptjs';
+import { NotFoundError, UnAuthorizedError } from '../errors';
+import { filterObjWithKey } from '../services/utils';
 
 export const userRouter = Router();
 
 userRouter.get('/user', async (req, res) => {
-  const user = await Users.findById(req.query.id, {});
-  if (user) {
-    const data = user.toJSON();
-    const { password, ...filterdUsers } = data;
-    res.status(200).send(filterdUsers);
-  } else {
+  try {
+    const secret = JSON.parse(req.secret ? req.secret : '');
+    const sessionUser = secret.id;
+    const user = await Users.findById(req.query.id, { _id: sessionUser });
+    if (user) {
+      const data = filterObjWithKey('password', user.toJSON());
+      res.status(200).json(data);
+    } else {
+      throw new NotFoundError();
+    }
+  } catch (err) {
+    if (err instanceof NotFoundError) {
+      res.status(404).json({ error: err.message });
+    }
+    res.status(500).send(err);
   }
 });
 
-userRouter.get('/users', async (_, res) => {
-  const users = await Users.find({});
-  const filterdUsers = users.map((i) => {
-    const data = i.toJSON();
-    const { password, ...user } = data;
-    return user;
-  });
-  res.status(200).send(filterdUsers);
+userRouter.get('/users', async (req, res) => {
+  try {
+    const secret = JSON.parse(req.secret ? req.secret : '');
+    if (secret.isAdmin) {
+      const users = await Users.find({});
+      const filterdUsers = users.map((i) =>
+        filterObjWithKey('password', i.toJSON())
+      );
+      res.status(200).json(filterdUsers);
+    } else {
+      throw new UnAuthorizedError();
+    }
+  } catch (err) {
+    if (err instanceof UnAuthorizedError) {
+      res.status(401).json({ error: err.message });
+    }
+    res.status(500).send(err);
+  }
 });
 
-userRouter.post('/user', async (req, res) => {
-  const { name, username, password } = req.body;
-  const encryptedPwd = hash(password, 7);
-  const createdUser = await Users.create({
-    name,
-    username,
-    password: encryptedPwd,
-    status: 'active',
-  });
-  res.status(200).send(createdUser);
-});
-
-userRouter.put('/user', async (req, res) => {
-  const { id, name, password } = req.body;
-  const updateInfo: any = { _id: id };
-  if (name) {
-    updateInfo['name'] = name;
+userRouter.put('/', async (req, res) => {
+  try {
+    const secret = JSON.parse(req.secret ? req.secret : '');
+    const sessionUser = secret.id;
+    const { id, name, password } = req.body;
+    if (secret.isAdmin || id === sessionUser) {
+      const updateInfo: any = { _id: id };
+      if (name) {
+        updateInfo['name'] = name;
+      }
+      if (password) {
+        const encryptedPwd = await hash(password, 7);
+        updateInfo['password'] = encryptedPwd;
+      }
+      const updatedUser = await Users.updateOne(updateInfo);
+      res.status(200).json(updatedUser);
+    } else {
+      throw new UnAuthorizedError();
+    }
+  } catch (err) {
+    if (err instanceof UnAuthorizedError) {
+      res.status(401).json({ error: err.message });
+    }
+    res.status(500).send(err);
   }
-  if (password) {
-    const encryptedPwd = hash(password, 7);
-    updateInfo['password'] = encryptedPwd;
-  }
-  const updatedUser = await Users.updateOne(updateInfo);
-  res.status(200).send(updatedUser);
 });
 
 userRouter.delete('/user/:id', async (req, res) => {
-  const { id } = req.params;
-  const user = await Users.deleteOne({ _id: id });
-  res.status(200).send(user);
+  try {
+    const secret = JSON.parse(req.secret ? req.secret : '');
+    if (secret.isAdmin) {
+      const { id } = req.params;
+      const user = await Users.deleteOne({ _id: id });
+      res.status(200).json(user);
+    } else {
+      throw new UnAuthorizedError();
+    }
+  } catch (err) {
+    if (err instanceof UnAuthorizedError) {
+      res.status(401).json({ error: err.message });
+    }
+    res.status(500).send(err);
+  }
 });
