@@ -10,9 +10,9 @@ export const authMiddleware = async (
 ) => {
   try {
     // check if auth header exists
-    if (req.headers.authorization) {
+    if (req.cookies.user_token) {
       // parse token from header
-      const token = req.headers.authorization.split(' ')[1]; //split the header and get the token
+      const token = req.cookies.user_token;
       if (token) {
         const payload = verify(token, SECRET) as JwtPayload;
         if (payload) {
@@ -36,7 +36,7 @@ export const authMiddleware = async (
         res.status(400).json({ error: 'malformed auth header' });
       }
     } else {
-      res.status(400).json({ error: 'No authorization header' });
+      res.status(400).json({ error: 'In-valid session' });
     }
   } catch (error) {
     res.status(400).json({ error });

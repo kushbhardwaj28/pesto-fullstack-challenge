@@ -10,6 +10,7 @@ const TaskSchema = new Schema(
       },
     },
     title: { type: String, required: [true, 'Title is required'] },
+    description: { type: String },
     status: {
       type: String,
       required: [true, 'status is required'],

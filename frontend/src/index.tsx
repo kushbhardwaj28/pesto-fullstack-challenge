@@ -1,15 +1,30 @@
+import CssBaseline from '@mui/material/CssBaseline';
+import { ThemeProvider } from '@mui/material/styles';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import App from './components/app/App';
+import Login from './components/login/Login';
 import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
+import theme from './theme';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <BrowserRouter basename={'/'}>
+        <Routes>
+          <Route path="/login" element={<Login />}>
+            {/* <Route path="login" element={<Login />} /> */}
+          </Route>
+          <Route path="/*" element={<App />}></Route>
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   </React.StrictMode>
 );
 

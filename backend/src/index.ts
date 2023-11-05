@@ -1,6 +1,8 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import express from 'express';
 import { db } from './db/conn';
 import { logger } from './logger';
@@ -14,14 +16,12 @@ import { authMiddleware } from './middleware/auth';
 import { hash } from 'bcryptjs';
 import { filterObjWithKey } from './services/utils';
 
-dotenv.config();
-
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(cors({ origin: '*' }));
+app.use(cors({ origin: true, credentials: true }));
 
 db();
 
@@ -54,7 +54,15 @@ app.post('/login', async (req, res) => {
       const isValidUser = await compare(password, user.password);
       if (isValidUser) {
         const token = sign({ id: user._id, username: user.username }, SECRET);
-        res.json({ token });
+        const expires = new Date();
+        expires.setTime(expires.getTime() + 24 * 60 * 60 * 1000);
+        res
+          .cookie('user_token', token, {
+            expires: expires,
+            path: '/',
+          })
+          .status(200)
+          .send('Success');
       } else {
         res.status(400).json({ error: 'Invalid username or password' });
       }

@@ -11,7 +11,7 @@ userRouter.get('/user', async (req, res) => {
   try {
     const secret = JSON.parse(req.secret ? req.secret : '');
     const sessionUser = secret.id;
-    const user = await Users.findById(req.query.id, { _id: sessionUser });
+    const user = await Users.findById(sessionUser);
     if (user) {
       const data = filterObjWithKey('password', user.toJSON());
       res.status(200).json(data);

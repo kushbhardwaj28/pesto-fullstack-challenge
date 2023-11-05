@@ -49,9 +49,10 @@ apiRouter.post('/', async (req, res) => {
     const secret = JSON.parse(req.secret ? req.secret : '');
     const sessionUser = secret.id;
 
-    const { title, status } = req.body;
+    const { title, description, status } = req.body;
     const createdTask = await Tasks.create({
       title: title,
+      description: description ? description : '',
       status: status ? status : 'All',
       user: sessionUser,
     });
@@ -65,7 +66,7 @@ apiRouter.put('/', async (req, res) => {
   try {
     const secret = JSON.parse(req.secret ? req.secret : '');
     const sessionUser = secret.id;
-    const { id, title, status } = req.body;
+    const { id, title, description, status } = req.body;
     await getTaskByUser(id, `${sessionUser}`, secret.isAdmin);
 
     const findFilter: any = { _id: id };
@@ -76,6 +77,9 @@ apiRouter.put('/', async (req, res) => {
     const updateInfo: any = { _id: id };
     if (title) {
       updateInfo['title'] = title;
+    }
+    if (description) {
+      updateInfo['description'] = description;
     }
     if (status) {
       updateInfo['status'] = status;
