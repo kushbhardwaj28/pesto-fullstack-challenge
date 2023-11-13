@@ -1,27 +1,27 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import ProtectedRoute from '../../utils/ProtectedRoute';
 import Home from '../home/Home';
+import { useNavigate } from 'react-router-dom';
+import { useCookies } from 'react-cookie';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userToken] = useCookies(['user_token']);
+  const navigate = useNavigate();
+
   const checkUserToken = () => {
-    const userToken = localStorage.getItem('user-token');
-    if (!userToken || userToken === 'undefined') {
-      setIsLoggedIn(false);
+    if (!userToken.user_token) {
+      navigate('/login');
     }
-    setIsLoggedIn(true);
   };
   useEffect(() => {
     checkUserToken();
-  }, [isLoggedIn]);
+  });
 
   return (
     <React.Fragment>
-      {/* {isLoggedIn && <PortalNavbar />} */}
       <ProtectedRoute>
         <Home />
       </ProtectedRoute>
-      {/* {isLoggedIn && <PortalFooter />} */}
     </React.Fragment>
   );
 }

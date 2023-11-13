@@ -1,21 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 const ProtectedRoute = (props: any) => {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userToken] = useCookies(['user_token']);
 
   const checkUserToken = () => {
-    if (!userToken.user_token || userToken.user_token === 'undefined') {
-      setIsLoggedIn(false);
+    console.log(!userToken || !userToken.user_token);
+    if (!userToken.user_token) {
       return navigate('/login');
     }
-    setIsLoggedIn(true);
   };
   useEffect(() => {
     checkUserToken();
   });
-  return <React.Fragment>{isLoggedIn ? props.children : null}</React.Fragment>;
+  return (
+    <React.Fragment>
+      {userToken.user_token ? props.children : null}
+    </React.Fragment>
+  );
 };
 export default ProtectedRoute;

@@ -11,14 +11,18 @@ import {
   CircularProgress,
   Alert,
   Snackbar,
+  Link,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import logo from '../../loginImg.jpg';
+import logo from '../../loginImg.png';
 import { baseAPI, loginPath } from '../../constants';
+import { useCookies } from 'react-cookie';
+
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState('');
+  const [userToken] = useCookies(['user_token']);
 
   const navigate = useNavigate();
 
@@ -43,7 +47,7 @@ const Login = () => {
           console.log(error.response);
           setIsLoading(false);
           setOpen(true);
-          setErrorMessage(error.response);
+          setErrorMessage(error.response.data.error);
           btnPointer.removeAttribute('disabled');
         });
     }
@@ -61,8 +65,7 @@ const Login = () => {
   };
 
   const checkUserToken = () => {
-    const userToken = localStorage.getItem('user-token');
-    if (userToken && userToken !== '') {
+    if (userToken && userToken.user_token) {
       return navigate('/');
     }
   };
@@ -96,6 +99,7 @@ const Login = () => {
         md={6}
         sx={{
           display: 'flex',
+          flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
         }}
@@ -150,6 +154,13 @@ const Login = () => {
             >
               {isLoading ? <CircularProgress color="warning" /> : 'Sign In'}
             </Button>
+            <Grid container sx={{ justifyContent: 'end' }}>
+              <Grid item>
+                <Link href="/signup" variant="body2">
+                  {"Don't have an account? Sign Up"}
+                </Link>
+              </Grid>
+            </Grid>
             <Snackbar open={open} autoHideDuration={6000}>
               <Alert
                 onClose={handleClose}

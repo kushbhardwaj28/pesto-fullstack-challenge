@@ -5,6 +5,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import App from './components/app/App';
 import Login from './components/login/Login';
+import SignUp from './components/signup/Signup';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 import theme from './theme';
@@ -18,9 +19,8 @@ root.render(
       <CssBaseline />
       <BrowserRouter basename={'/'}>
         <Routes>
-          <Route path="/login" element={<Login />}>
-            {/* <Route path="login" element={<Login />} /> */}
-          </Route>
+          <Route path="/login" element={<Login />}></Route>
+          <Route path="/signup" element={<SignUp />}></Route>
           <Route path="/*" element={<App />}></Route>
         </Routes>
       </BrowserRouter>
